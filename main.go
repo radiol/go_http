@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 )
@@ -13,7 +12,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	ref, err := url.Parse("/ip")
+	ref, err := url.Parse("/test?a=1&b=2")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -21,12 +20,16 @@ func main() {
 	endpoint := base.ResolveReference(ref).String()
 	fmt.Println(endpoint)
 
-	resp, err := http.Get(endpoint)
+	req, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	defer resp.Body.Close()
-	body, _ := io.ReadAll(resp.Body)
-	fmt.Println(string(body))
+	q := req.URL.Query()
+	fmt.Println(q)
+	// クエリに追加
+	q.Add("c", "3&%")
+	fmt.Println(q)
+	// & is escaped to %26, % is escaped to %25
+	fmt.Println(q.Encode())
 }
